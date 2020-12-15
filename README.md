@@ -1,4 +1,4 @@
-# pms-vue
+# pms
 
 ## Project setup
 ```
