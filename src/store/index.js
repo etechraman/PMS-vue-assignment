@@ -15,14 +15,23 @@ export default new Vuex.Store({
     opt2: "",
     opt3: "",
     opt4: "",
+    addNewOption: "",
   },
   getters: {
     options: (state) => state.options,
     polls: (state) => state.polls,
   },
   mutations: {
-    voted() {
+    voted(state, payload) {
+      console.log(payload, state);
       console.log("I Voted");
+      console.log(state.login);
+      state.login.userVote.push(payload);
+      console.log(state.login.userVote, ">>>>>userVote");
+      localStorage.setItem(
+        "userVote",
+        JSON.stringify(this.state.login.userVote)
+      );
     },
     updateId(state, val) {
       state.id = val;
@@ -46,14 +55,55 @@ export default new Vuex.Store({
       state.polls = val;
     },
     updatePolls(state, val) {
-      // console.log(val);
       state.polls.push(val);
+    },
+    updateAddNewOption(state, val) {
+      state.addNewOption = val;
     },
   },
   actions: {
+    async addNewOption({ commit }, payload) {
+      try {
+        commit("login_progress", true);
+        await axios.post(
+          `https://secure-refuge-14993.herokuapp.com/add_new_option?id=${payload.id}&option_text=${payload.text}`
+        );
+        commit("login_progress", false);
+        commit("updateAddNewOption", "");
+        return true;
+      } catch (err) {
+        commit("login_progress", false);
+        commit("login_fail", err);
+      }
+    },
+    async deleteOption({ commit }, payload) {
+      try {
+        commit("login_progress", true);
+        await axios.post(
+          `https://secure-refuge-14993.herokuapp.com/delete_poll_option?id=${payload.id}&option_text=${payload.text}`
+        );
+        commit("login_progress", false);
+        return true;
+      } catch (err) {
+        commit("login_progress", false);
+        commit("login_fail", err);
+      }
+    },
+    async deletePoll({ commit }, id) {
+      try {
+        commit("login_progress", true);
+        await axios.post(
+          `https://secure-refuge-14993.herokuapp.com/delete_poll?id=${id}`
+        );
+        commit("login_progress", false);
+        return true;
+      } catch (err) {
+        commit("login_progress", false);
+        commit("login_fail", err);
+      }
+    },
     async listUsers() {
       try {
-        // commit("login_progress", true);
         const response = await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_users"
         );
@@ -64,14 +114,11 @@ export default new Vuex.Store({
     },
     async listPolls() {
       try {
-        // commit("login_progress", true);
         const response = await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_polls"
         );
         console.log(response);
       } catch (err) {
-        // commit("login_progress", false);
-        // commit("login_fail", err);
         alert("Error");
       }
     },
@@ -82,7 +129,6 @@ export default new Vuex.Store({
           `https://secure-refuge-14993.herokuapp.com/add_poll?title=${payload.title}&options=${payload.opt1}____${payload.opt2}____${payload.opt3}____${payload.opt4}`
         );
         console.log(response);
-        // delete payload.password;
         payload.token = response;
         commit("updateId", "");
         commit("updateTitle", "");
@@ -96,21 +142,22 @@ export default new Vuex.Store({
         commit("login_fail", err);
       }
     },
-
     async vote({ commit }, payload) {
+      commit("clearPolls", []);
       try {
-        console.log(this.state.login.userToken);
-        const headers = { access_token: localStorage.userToken };
-        console.log(headers);
-        console.log(payload);
-        // console.log(payload.text);
-        const response = await axios.post(
+        let headers = {
+          access_token: `${localStorage.getItem("userToken")}`,
+        };
+        commit("login_progress", true);
+        axios.get(
           `https://secure-refuge-14993.herokuapp.com/do_vote?id=${payload.id}&option_text=${payload.text}`,
-          payload,
           { headers }
         );
-        console.log(response);
-        commit("voted");
+        await commit("voted", {
+          userToken: headers.access_token,
+          pollId: payload.id,
+        });
+        commit("login_progress", false);
       } catch (err) {
         console.log("Error!!", err);
       }

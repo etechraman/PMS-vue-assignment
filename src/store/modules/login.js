@@ -10,18 +10,14 @@ export default {
     error: false,
     login_progress: false,
     userToken: "",
+    userVote: [],
   },
   getters: {
     getUser: (state) => state.user,
     isLoggedIn: (state) => state.isLoggedIn,
-    userToken: (state) => state.userToken,
+    userVote: (state) => state.userVote,
   },
   actions: {
-    // login({ commit }, payload) {
-    //   commit("login", payload);
-    //   commit("updateUsername", "");
-    //   commit("updatePassword", "");
-    // },
     async login({ commit }, payload) {
       try {
         commit("login_progress", true);
@@ -30,9 +26,11 @@ export default {
           payload
         );
         delete payload.password;
-        this.state.userToken = response.data.token;
-        console.log(this.state.userToken);
+        // console.log(this.state);
+        this.state.login.userToken = response.data.token;
+        // console.log(this.state.login.userVote.userToken)
         const userData = VueJwtDecode.decode(response.data.token);
+        // console.log(userData);
         // console.log(response.data.token);
         payload.token = response;
         commit("login", {
@@ -44,6 +42,7 @@ export default {
         commit("updatePassword", "");
         commit("login_progress", false);
       } catch (err) {
+        console.log(err);
         // if (response.status == 304) console.log("hello");
         commit("login_progress", false);
         alert("Login Failed");
@@ -60,13 +59,14 @@ export default {
       state.isLoggedIn = true;
       localStorage.setItem("user", JSON.stringify(state.user));
       localStorage.setItem("isLoggedIn", state.isLoggedIn);
-      localStorage.setItem("userToken", this.state.userToken);
+      localStorage.setItem("userToken", this.state.login.userToken);
       if (data.role === "admin" || data.role === "Admin") {
         this.state.register.isAdmin = true;
-        localStorage.setItem("isAdmin", "true");
-      } else if (data.role === "guest" || data.role === "Guest")
+        localStorage.setItem("isAdmin", true);
+      } else if (data.role === "guest" || data.role === "Guest") {
         this.state.register.isGuest = true;
-      localStorage.setItem("isGuest", true);
+        localStorage.setItem("isGuest", true);
+      }
       state.username = "";
       state.password = "";
     },
@@ -81,6 +81,7 @@ export default {
       state.isLoggedIn = false;
       this.state.register.isAdmin = false;
       this.state.register.isGuest = false;
+      this.state.login.userToken = "";
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
       localStorage.removeItem("isAdmin");

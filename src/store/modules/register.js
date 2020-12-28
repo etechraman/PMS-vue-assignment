@@ -30,6 +30,7 @@ export default {
         commit("updatePassword", "");
         commit("login_progress", false);
       } catch (err) {
+        console.log(err);
         commit("login_progress", false);
         commit("login_fail", err);
       }

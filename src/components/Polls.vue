@@ -15,22 +15,29 @@
           <div class="card-header ml-5">
             {{ index + 1 }}. &nbsp; {{ item.title }}
           </div>
-          <div class="card-content ml-5">
-            <input id="opt1" type="checkbox" class="mr-5" />{{ item.opt1 }}
-          </div>
-          <div class="card-content ml-5">
-            <input id="opt2" type="checkbox" class="mr-5" />{{ item.opt2 }}
-          </div>
-          <div class="card-content ml-5">
-            <input id="opt3" type="checkbox" class="mr-5" />{{ item.opt3 }}
-          </div>
-          <div class="card-content ml-5">
-            <input id="opt4" type="checkbox" class="mr-5" />{{ item.opt4 }}
+          <div
+            class="card-content ml-5"
+            v-for="(option, i) in item.options"
+            :key="i"
+          >
+            <input
+              name="radio"
+              type="radio"
+              class="mr-5"
+              v-model="selected"
+              :value="`${option.option}`"
+              @click="checkboxClick($event)"
+            />{{ option.option }}
           </div>
           <div class="card-footer-item">
             <a
               v-if="polls.length"
-              class="button is-black"
+              :class="{
+                button: true,
+                'is-full': true,
+                'is-black': true,
+                'is-loading': login_progress,
+              }"
               @click="submitClick(item)"
               >Submit</a
             >
@@ -44,55 +51,101 @@
 <script>
 import axios from "axios";
 import { mapGetters } from "vuex";
+import VueJwtDecode from "vue-jwt-decode";
+
 export default {
   name: "Polls",
-  async mounted() {
-    this.$store.commit("clearPolls", []);
-    try {
-      // commit("login_progress", true);
-      const response = await axios.get(
-        "https://secure-refuge-14993.herokuapp.com/list_polls"
-      );
-
-      for (let i = 0; i < response.data.data.length; i++) {
-        this.$store.commit("updatePolls", {
-          id: response.data.data[i]._id,
-          title: response.data.data[i].title,
-          opt1: response.data.data[i].options[0].option,
-          opt2: response.data.data[i].options[1].option,
-          opt3: response.data.data[i].options[2].option,
-          opt4: response.data.data[i].options[3].option,
-        });
-      }
-      //   console.log(this.$store.state.polls);
-    } catch (err) {
-      this.$store.commit("clearPolls", []);
-      alert("Error");
-    }
+  data() {
+    return {
+      selected: "",
+      userHasVoted: false,
+    };
+  },
+  mounted() {
+    this.fetchPolls();
   },
   computed: {
     ...mapGetters({
       polls: "polls",
       userToken: "userToken",
+      userVote: "userVote",
     }),
+    login_progress: {
+      get() {
+        return this.$store.state.login.login_progress;
+      },
+      set(val) {
+        this.$store.commit("updateLoginProcess", val);
+      },
+    },
   },
   methods: {
-    // clickCheckbox(e) {
-    //   console.log(e);
-    //   console.log(this);
-    //   console.log(document.getElementById("opt1").value);
-    // },
+    checkboxClick(e) {
+      console.log(e);
+    },
     submitClick(item) {
       let text = "";
-      if (document.getElementById("opt1").checked) text = item.opt1;
-      else if (document.getElementById("opt2").checked) text = item.opt2;
-      else if (document.getElementById("opt3").checked) text = item.opt3;
-      else if (document.getElementById("opt4").checked) text = item.opt4;
-      else text = "";
-      this.$store.dispatch("vote", {
-        id: item.id,
-        text: text,
-      });
+      for (let i = 0; i < item.options.length; i++) text = this.selected;
+
+      if (text != "") {
+        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        this.$store.dispatch("vote", {
+          id: item.id,
+          text: text,
+        });
+        this.userHasVoted = true;
+        this.fetchPolls();
+      } else {
+        alert("Error!! Select an option before clicking submit");
+      }
+    },
+
+    async fetchPolls() {
+      this.$store.commit("clearPolls", []);
+      if (localStorage.getItem("userVote") !== null) {
+        this.$store.state.login.userVote = JSON.parse(
+          localStorage.getItem("userVote")
+        );
+      } else {
+        this.$store.state.login.userVote = [];
+      }
+      let pollID = "";
+      if (this.$store.state.login.userVote !== []) {
+        this.$store.state.login.userVote.forEach((item) => {
+          if (
+            VueJwtDecode.decode(item.userToken)._id ===
+            VueJwtDecode.decode(localStorage.getItem("userToken"))._id
+          ) {
+            pollID = item.pollId;
+            return false;
+          } else pollID = "";
+        });
+      }
+
+      try {
+        const response = await axios.get(
+          "https://secure-refuge-14993.herokuapp.com/list_polls"
+        );
+        for (let i = 0; i < response.data.data.length; i++) {
+          if (pollID === "") {
+            this.$store.commit("updatePolls", {
+              id: response.data.data[i]._id,
+              title: response.data.data[i].title,
+              options: response.data.data[i].options,
+            });
+          } else if (pollID === response.data.data[i]._id) {
+            this.$store.commit("updatePolls", {
+              id: response.data.data[i]._id,
+              title: response.data.data[i].title,
+              options: response.data.data[i].options,
+            });
+          }
+        }
+      } catch (err) {
+        console.log(err);
+        this.$store.commit("clearPolls", []);
+        alert("Error");
+      }
     },
   },
 };

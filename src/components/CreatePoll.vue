@@ -111,13 +111,23 @@ export default {
   methods: {
     ...mapActions(["createPoll"]),
     registerClick() {
-      this.$store.dispatch("createPoll", {
-        title: this.title,
-        opt1: this.opt1,
-        opt2: this.opt2,
-        opt3: this.opt3,
-        opt4: this.opt4,
-      });
+      if (
+        this.opt1 !== "" &&
+        this.opt2 !== "" &&
+        this.opt3 !== "" &&
+        this.opt4 !== ""
+      ) {
+        this.$store.dispatch("createPoll", {
+          title: this.title,
+          opt1: this.opt1,
+          opt2: this.opt2,
+          opt3: this.opt3,
+          opt4: this.opt4,
+        });
+      } else
+        alert(
+          "4 options are mandatory!! You can delete options from actions anytime"
+        );
     },
   },
 };

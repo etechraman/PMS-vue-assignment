@@ -81,12 +81,6 @@ export default {
   methods: {
     ...mapActions(["login"]),
     loginClick() {
-      //   if (this.username.length > 0 && this.password.length > 0) {
-      //     this.$store.dispatch("login", {
-      //       username: this.username,
-      //       password: this.password,
-      //     });
-      //   }
       this.$store.dispatch("login", {
         username: this.username,
         password: this.password,

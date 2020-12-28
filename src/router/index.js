@@ -1,13 +1,12 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-// import login from "../store/modules/login";
 import Home from "../views/Home.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/",
+    path: "",
     name: "Home",
     component: Home,
   },
@@ -23,42 +22,27 @@ const routes = [
   {
     path: "/register",
     name: "Register",
-    // route level code-splitting
-    // this generates a separate chunk (login.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "login" */ "../components/Register.vue"),
+    component: () => import("../components/Register.vue"),
   },
   {
     path: "/profile",
     name: "UserProfile",
-    // route level code-splitting
-    // this generates a separate chunk (profile.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "user-profile" */ "../components/UserProfile.vue"
-      ),
+    component: () => import("../components/UserProfile.vue"),
   },
   {
     path: "/polls",
     name: "Polls",
-    // route level code-splitting
-    // this generates a separate chunk (profile.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "user-profile" */ "../components/Polls.vue"),
+    component: () => import("../components/Polls.vue"),
   },
   {
     path: "/createpoll",
     name: "CreatePoll",
-    // route level code-splitting
-    // this generates a separate chunk (profile.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "user-profile" */ "../components/CreatePoll.vue"
-      ),
+    component: () => import("../components/CreatePoll.vue"),
+  },
+  {
+    path: "/managepolls",
+    name: "ManagePolls",
+    component: () => import("../components/ManagePolls.vue"),
   },
 ];
 
@@ -67,23 +51,45 @@ const router = new VueRouter({
 });
 router.beforeEach((to, from, next) => {
   if (localStorage.getItem("isLoggedIn") !== null) {
-    if (
-      to.path == "/profile" ||
-      to.path == "/register" ||
-      to.path == "/polls" ||
-      to.path == "/createpoll"
-    ) {
-      next();
-    } else if (to.path == "/" || to.path == "/#" || to.path == "/login") {
-      next("/profile");
-    } else {
-      next(false);
+    if (localStorage.getItem("isGuest") !== null) {
+      if (to.path == "/profile" || to.path == "/polls") {
+        next();
+      } else if (
+        to.path == "/" ||
+        to.path == "/#" ||
+        to.path == "/login" ||
+        to.path == "/register" ||
+        to.path == "createPoll" ||
+        to.path == "managePolls"
+      ) {
+        next("/profile");
+      } else {
+        next(false);
+      }
+    } else if (localStorage.getItem("isAdmin") !== null) {
+      if (
+        to.path == "/profile" ||
+        to.path == "/register" ||
+        to.path == "createPoll" ||
+        to.path == "managePolls"
+      ) {
+        next();
+      } else if (
+        to.path == "/" ||
+        to.path == "/#" ||
+        to.path == "/login" ||
+        to.path == "/polls"
+      ) {
+        next("/profile");
+      } else {
+        next(false);
+      }
     }
   } else {
-    if (to.path == "/profile" || to.path == "/register") {
-      next(false);
-    } else {
+    if (to.path == "/" || to.path == "/login" || to.path == "/#") {
       next();
+    } else {
+      next(false);
     }
   }
 });

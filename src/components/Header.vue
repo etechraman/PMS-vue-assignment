@@ -6,9 +6,6 @@
         <b-navbar-item v-if="isLoggedIn" @click="home">
           Home
         </b-navbar-item>
-        <b-navbar-item v-if="isAdmin" @click="listUsers">
-          Users
-        </b-navbar-item>
         <b-navbar-item v-if="isGuest" @click="listPolls">
           Polls
         </b-navbar-item>
@@ -19,8 +16,8 @@
           <b-navbar-item @click="createPoll">
             Create a new Poll
           </b-navbar-item>
-          <b-navbar-item href="#">
-            Edit Polls
+          <b-navbar-item @click="managePolls">
+            Manage Polls
           </b-navbar-item>
         </b-navbar-dropdown>
       </div>
@@ -28,8 +25,6 @@
     <div class="navbar-menu">
       <div class="navbar-end">
         <div class="navbar-item">
-          <!-- <router-link to="/login">Login</router-link> -->
-          <!-- <a @click="login" class="button is-white">Login</a> -->
           <a v-if="!isLoggedIn" @click="login" class="button is-white">Login</a>
           <a v-if="isLoggedIn" @click="logout" class="button is-white"
             >Logout</a
@@ -44,11 +39,6 @@
 import { mapActions } from "vuex";
 export default {
   name: "Header",
-  // mounted: function() {
-  //   if (localStorage.getItem("isLoggedIn") !== null) {
-  //     this.$store.state.register.isAdmin = true;
-  //   } else this.$store.state.register.isAdmin = false;
-  // },
   computed: {
     isLoggedIn: {
       get() {
@@ -100,10 +90,12 @@ export default {
     },
     listPolls() {
       if (this.$route.name != "PollsView") this.$router.push("polls");
-      // this.$store.dispatch("listPolls");
     },
     createPoll() {
       if (this.$route.name != "CreatePoll") this.$router.push("createpoll");
+    },
+    managePolls() {
+      if (this.$route.name != "ManagePolls") this.$router.push("managePolls");
     },
   },
 };
