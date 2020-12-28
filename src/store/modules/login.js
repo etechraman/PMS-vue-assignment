@@ -26,12 +26,8 @@ export default {
           payload
         );
         delete payload.password;
-        // console.log(this.state);
         this.state.login.userToken = response.data.token;
-        // console.log(this.state.login.userVote.userToken)
         const userData = VueJwtDecode.decode(response.data.token);
-        // console.log(userData);
-        // console.log(response.data.token);
         payload.token = response;
         commit("login", {
           username: userData.username,
@@ -43,7 +39,6 @@ export default {
         commit("login_progress", false);
       } catch (err) {
         console.log(err);
-        // if (response.status == 304) console.log("hello");
         commit("login_progress", false);
         alert("Login Failed");
         commit("login_fail", err);

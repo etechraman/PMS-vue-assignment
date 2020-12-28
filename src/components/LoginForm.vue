@@ -30,7 +30,6 @@ export default {
     },
     error_message(val) {
       if (val) {
-        console.log(this);
         this.$snackbar.open({
           duration: 5000,
           message: "Login failed. " + val.message,

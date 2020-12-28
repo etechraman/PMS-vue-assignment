@@ -23,11 +23,7 @@ export default new Vuex.Store({
   },
   mutations: {
     voted(state, payload) {
-      console.log(payload, state);
-      console.log("I Voted");
-      console.log(state.login);
       state.login.userVote.push(payload);
-      console.log(state.login.userVote, ">>>>>userVote");
       localStorage.setItem(
         "userVote",
         JSON.stringify(this.state.login.userVote)
@@ -103,21 +99,17 @@ export default new Vuex.Store({
       }
     },
     async listUsers() {
-      try {
-        const response = await axios.get(
+      try {await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_users"
         );
-        console.log(response);
       } catch (err) {
         alert("Error");
       }
     },
     async listPolls() {
-      try {
-        const response = await axios.get(
+      try {await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_polls"
         );
-        console.log(response);
       } catch (err) {
         alert("Error");
       }
@@ -128,7 +120,6 @@ export default new Vuex.Store({
         const response = await axios.post(
           `https://secure-refuge-14993.herokuapp.com/add_poll?title=${payload.title}&options=${payload.opt1}____${payload.opt2}____${payload.opt3}____${payload.opt4}`
         );
-        console.log(response);
         payload.token = response;
         commit("updateId", "");
         commit("updateTitle", "");

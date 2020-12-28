@@ -19,7 +19,6 @@ export default {
         const response = await axios.post(
           `https://secure-refuge-14993.herokuapp.com/add_user?username=${payload.username}&password=${payload.password}&role=${payload.role}`
         );
-        console.log(response);
         delete payload.password;
         payload.token = response;
         commit("updateFirstName", "");
@@ -30,7 +29,7 @@ export default {
         commit("updatePassword", "");
         commit("login_progress", false);
       } catch (err) {
-        console.log(err);
+        // console.log(err);
         commit("login_progress", false);
         commit("login_fail", err);
       }

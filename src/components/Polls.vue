@@ -26,7 +26,6 @@
               class="mr-5"
               v-model="selected"
               :value="`${option.option}`"
-              @click="checkboxClick($event)"
             />{{ option.option }}
           </div>
           <div class="card-footer-item">
@@ -80,15 +79,11 @@ export default {
     },
   },
   methods: {
-    checkboxClick(e) {
-      console.log(e);
-    },
     submitClick(item) {
       let text = "";
       for (let i = 0; i < item.options.length; i++) text = this.selected;
 
       if (text != "") {
-        console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         this.$store.dispatch("vote", {
           id: item.id,
           text: text,
@@ -142,7 +137,7 @@ export default {
           }
         }
       } catch (err) {
-        console.log(err);
+        // console.log(err);
         this.$store.commit("clearPolls", []);
         alert("Error");
       }

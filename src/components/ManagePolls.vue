@@ -98,7 +98,6 @@ export default {
         });
       }
     } catch (err) {
-      console.log(err);
       this.$store.commit("clearPolls", []);
       alert("Error");
     }
@@ -142,13 +141,11 @@ export default {
       }
     },
     async deleteOption(item, option) {
-      console.log(item.id, option.option);
       if (confirm("Caution!! Are you sure you want to delete this option?")) {
         const resp = await this.$store.dispatch("deleteOption", {
           id: item.id,
           text: option.option,
         });
-        console.log(resp);
         if (resp) this.viewPolls();
       }
     },
@@ -167,7 +164,7 @@ export default {
           });
         }
       } catch (err) {
-        console.log(err);
+        // console.log(err);
         this.$store.commit("clearPolls", []);
         alert("Error");
       }
