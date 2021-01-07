@@ -107,7 +107,6 @@ export default {
       let pollID = "";
       if (this.$store.state.login.userVote !== []) {
         this.$store.state.login.userVote.forEach((item) => {
-          console.log(pollID);
           if (
             VueJwtDecode.decode(item.userToken)._id ===
             VueJwtDecode.decode(localStorage.getItem("userToken"))._id
