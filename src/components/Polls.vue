@@ -115,10 +115,6 @@ export default {
             pollID = item.pollId;
             return false;
           }
-          // else {
-          //   console.log("Hello");
-          //   pollID = "";
-          // }
         });
       }
 
