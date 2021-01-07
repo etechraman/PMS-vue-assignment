@@ -107,13 +107,18 @@ export default {
       let pollID = "";
       if (this.$store.state.login.userVote !== []) {
         this.$store.state.login.userVote.forEach((item) => {
+          console.log(pollID);
           if (
             VueJwtDecode.decode(item.userToken)._id ===
             VueJwtDecode.decode(localStorage.getItem("userToken"))._id
           ) {
             pollID = item.pollId;
             return false;
-          } else pollID = "";
+          }
+          // else {
+          //   console.log("Hello");
+          //   pollID = "";
+          // }
         });
       }
 
@@ -121,7 +126,8 @@ export default {
         const response = await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_polls"
         );
-        for (let i = 0; i < response.data.data.length; i++) {
+
+        for (let i = response.data.data.length - 1; i >= 0; i--) {
           if (pollID === "") {
             this.$store.commit("updatePolls", {
               id: response.data.data[i]._id,

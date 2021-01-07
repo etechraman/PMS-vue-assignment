@@ -20,7 +20,7 @@
         <b-input required type="password" v-model="password"> </b-input>
       </b-field>
       <b-field label="Confirm Password" class="mt-5">
-        <b-input required type="password" v-model="password"> </b-input>
+        <b-input required type="password" v-model="confirmPassword"> </b-input>
       </b-field>
       <button
         :class="{
@@ -92,6 +92,14 @@ export default {
         this.$store.commit("updatePassword", val);
       },
     },
+    confirmPassword: {
+      get() {
+        return this.$store.state.login.confirmPassword;
+      },
+      set(val) {
+        this.$store.commit("updateConfirmPassword", val);
+      },
+    },
     id: {
       get() {
         return this.$store.state.register.id;
@@ -104,14 +112,30 @@ export default {
   methods: {
     ...mapActions(["register"]),
     registerClick() {
-      this.$store.dispatch("register", {
-        username: this.username,
-        password: this.password,
-        role: this.role,
-        id: Math.random()
-          .toString(36)
-          .substr(2, 9),
-      });
+      if (this.firstname === "")
+        alert("Enter First Name before clicking submit");
+      else if (this.lastname === "")
+        alert("Enter the last name before clicking submit");
+      else if (this.username === "")
+        alert("Enter the user name before clicking submit");
+      else if (this.role === "")
+        alert("Select the role before clicking submit");
+      else if (this.password === "")
+        alert("Enter the password before clicking submit");
+      else if (this.password !== this.confirmPassword) {
+        alert("Passwords didnt match");
+        this.password = "";
+        this.confirmPassword = "";
+      } else {
+        this.$store.dispatch("register", {
+          username: this.username,
+          password: this.password,
+          role: this.role,
+          id: Math.random()
+            .toString(36)
+            .substr(2, 9),
+        });
+      }
     },
   },
 };

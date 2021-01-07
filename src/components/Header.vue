@@ -9,10 +9,10 @@
         <b-navbar-item v-if="isGuest" @click="listPolls">
           Polls
         </b-navbar-item>
+        <b-navbar-item v-if="!isLoggedIn" @click="signup">
+          Register
+        </b-navbar-item>
         <b-navbar-dropdown v-if="isAdmin" label="Actions">
-          <b-navbar-item @click="signup">
-            Register New User
-          </b-navbar-item>
           <b-navbar-item @click="createPoll">
             Create a new Poll
           </b-navbar-item>
@@ -95,7 +95,7 @@ export default {
       if (this.$route.name != "CreatePoll") this.$router.push("createpoll");
     },
     managePolls() {
-      if (this.$route.name != "ManagePolls") this.$router.push("managePolls");
+      if (this.$route.name != "ManagePolls") this.$router.push("managepolls");
     },
   },
 };
