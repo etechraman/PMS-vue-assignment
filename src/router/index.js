@@ -6,23 +6,91 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/",
+    path: "",
     name: "Home",
-    component: Home
+    component: Home,
   },
   {
-    path: "/about",
-    name: "About",
+    path: "/login",
+    name: "Login",
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk (login.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
-  }
+      import(/* webpackChunkName: "login" */ "../components/Login.vue"),
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("../components/Register.vue"),
+  },
+  {
+    path: "/profile",
+    name: "UserProfile",
+    component: () => import("../components/UserProfile.vue"),
+  },
+  {
+    path: "/polls",
+    name: "Polls",
+    component: () => import("../components/Polls.vue"),
+  },
+  {
+    path: "/createpoll",
+    name: "CreatePoll",
+    component: () => import("../components/CreatePoll.vue"),
+  },
+  {
+    path: "/managepolls",
+    name: "ManagePolls",
+    component: () => import("../components/ManagePolls.vue"),
+  },
 ];
 
 const router = new VueRouter({
-  routes
+  routes,
 });
-
+router.beforeEach((to, from, next) => {
+  if (localStorage.getItem("isLoggedIn") !== null) {
+    if (localStorage.getItem("isGuest") !== null) {
+      if (to.path == "/profile" || to.path == "/polls") {
+        next();
+      } else if (
+        to.path == "/" ||
+        to.path == "/#" ||
+        to.path == "/login" ||
+        to.path == "/register" ||
+        to.path == "createPoll" ||
+        to.path == "managePolls"
+      ) {
+        next("/profile");
+      } else {
+        next(false);
+      }
+    } else if (localStorage.getItem("isAdmin") !== null) {
+      if (
+        to.path == "/profile" ||
+        to.path == "/register" ||
+        to.path == "createPoll" ||
+        to.path == "managePolls"
+      ) {
+        next();
+      } else if (
+        to.path == "/" ||
+        to.path == "/#" ||
+        to.path == "/login" ||
+        to.path == "/polls"
+      ) {
+        next("/profile");
+      } else {
+        next(false);
+      }
+    }
+  } else {
+    if (to.path == "/" || to.path == "/login" || to.path == "/#") {
+      next();
+    } else {
+      next(false);
+    }
+  }
+});
 export default router;
