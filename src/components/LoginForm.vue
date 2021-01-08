@@ -1,6 +1,6 @@
 <template>
   <div class="loginForm">
-    <section>
+    <section v-on:keyup.enter="loginClick()">
       <b-field label="Username" class="mt-5">
         <b-input required v-model="username" maxlength="30"></b-input>
       </b-field>
@@ -19,10 +19,28 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions, mapMutations } from "vuex";
 export default {
   name: "LoginForm",
+  data() {
+    return {
+      has_minimum_length: false,
+      has_number: false,
+      has_lowercase: false,
+      has_uppercase: false,
+    };
+  },
+  mounted: function() {
+    this.username = "";
+    this.password = "";
+  },
   watch: {
+    password() {
+      this.has_minimum_length = this.password.length >= 8;
+      this.has_number = /\d/.test(this.password);
+      this.has_lowercase = /[a-z]/.test(this.password);
+      this.has_uppercase = /[A-Z]/.test(this.password);
+    },
     user(val) {
       if (val.username) {
         this.$router.push("profile");
@@ -79,11 +97,27 @@ export default {
   },
   methods: {
     ...mapActions(["login"]),
+    ...mapMutations(["popUp"]),
     loginClick() {
-      this.$store.dispatch("login", {
-        username: this.username,
-        password: this.password,
-      });
+      if (this.username === "") this.popUp("Enter Email Address");
+      else if (!this.username.includes("@"))
+        this.popUp("Enter a valid Email Address");
+      else if (this.role === "") this.popUp("Select Role");
+      else if (this.password === "") {
+        this.popUp("Enter Password");
+      } else if (
+        !this.has_minimum_length ||
+        !this.has_number ||
+        !this.has_lowercase ||
+        !this.has_uppercase
+      )
+        this.popUp("Enter a valid password");
+      else {
+        this.$store.dispatch("login", {
+          username: this.username,
+          password: this.password,
+        });
+      }
     },
   },
 };

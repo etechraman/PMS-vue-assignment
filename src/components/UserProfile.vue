@@ -10,6 +10,9 @@
         </div>
       </div>
     </section>
+    <div class="p-3 viewPolls">
+      <a v-if="isGuest" class="button is-light">View Polls</a>
+    </div>
   </div>
 </template>
 
@@ -19,8 +22,20 @@ export default {
   name: "UserProfile",
   computed: {
     ...mapGetters({
-      user: "getUser"
-    })
-  }
+      user: "getUser",
+      isGuest: "isGuest",
+    }),
+  },
 };
 </script>
+<style>
+.viewPolls {
+  display: none;
+}
+@media only screen and (max-width: 1023px) {
+  .viewPolls {
+    display: flex;
+    justify-content: center;
+  }
+}
+</style>

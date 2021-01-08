@@ -12,7 +12,7 @@
     <section>
       <div v-if="polls.length">
         <div v-for="(item, index) in polls" :key="index" class="card mb-6 mt-5">
-          <div class="card-header ml-5">
+          <div class="card-header ml-5 mr-5">
             {{ index + 1 }}. &nbsp; {{ item.title }}
           </div>
           <div
@@ -20,13 +20,9 @@
             v-for="(option, i) in item.options"
             :key="i"
           >
-            <input
-              name="radio"
-              type="radio"
-              class="mr-5"
-              v-model="selected"
-              :value="`${option.option}`"
-            />{{ option.option }}
+            <b-radio v-model="selected" :native-value="option.option">{{
+              option.option
+            }}</b-radio>
           </div>
           <div class="card-footer-item">
             <a
@@ -49,7 +45,7 @@
 
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import VueJwtDecode from "vue-jwt-decode";
 
 export default {
@@ -65,10 +61,17 @@ export default {
   },
   computed: {
     ...mapGetters({
-      polls: "polls",
       userToken: "userToken",
       userVote: "userVote",
     }),
+    polls: {
+      get() {
+        return this.$store.state.polls;
+      },
+      set(val) {
+        this.$store.commit("pollToView", val);
+      },
+    },
     login_progress: {
       get() {
         return this.$store.state.login.login_progress;
@@ -79,6 +82,8 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(["popUp"]),
+
     submitClick(item) {
       let text = "";
       for (let i = 0; i < item.options.length; i++) text = this.selected;
@@ -89,9 +94,16 @@ export default {
           text: text,
         });
         this.userHasVoted = true;
-        this.fetchPolls();
+        this.selected = text;
+        let pollToView = [];
+        this.polls.forEach((temp, index) => {
+          if (temp.id === item.id) {
+            pollToView = this.polls.slice(index, index + 1);
+          }
+        });
+        this.polls = pollToView;
       } else {
-        alert("Error!! Select an option before clicking submit");
+        this.popUp("Error!! Select an option before clicking submit");
       }
     },
 
@@ -112,6 +124,7 @@ export default {
             VueJwtDecode.decode(localStorage.getItem("userToken"))._id
           ) {
             pollID = item.pollId;
+            this.selected = item.option;
             return false;
           }
         });
@@ -140,7 +153,7 @@ export default {
       } catch (err) {
         // console.log(err);
         this.$store.commit("clearPolls", []);
-        alert("Error");
+        this.popUp("Error");
       }
     },
   },

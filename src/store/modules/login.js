@@ -41,7 +41,7 @@ export default {
       } catch (err) {
         console.log(err);
         commit("login_progress", false);
-        alert("Login Failed! Check username and password");
+        commit("popUp", "Login Failed! Check username and password");
         // commit("login_fail", err);
       }
     },
