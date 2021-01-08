@@ -21,16 +21,10 @@ export default {
         );
         delete payload.password;
         payload.token = response;
-        commit("updateFirstName", "");
-        commit("updateLastName", "");
-        commit("updateUsername", "");
         commit("updateId", "");
-        commit("updateRole", "");
-        commit("updatePassword", "");
-        commit("updateConfirmPassword", "");
         commit("login_progress", false);
-        if (response.data.error === 1) alert(response.data.message);
-        else alert("Congratulations!! User Registered");
+        if (response.data.error === 1) commit("popUp", response.data.message);
+        else commit("popUp", "Congratulations!! User Registered");
       } catch (err) {
         // console.log(err);
         commit("login_progress", false);

@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import login from "./modules/login";
 import register from "./modules/register";
 import axios from "axios";
+import { ToastProgrammatic as Toast } from "buefy";
 
 Vue.use(Vuex);
 
@@ -16,6 +17,7 @@ export default new Vuex.Store({
     opt3: "",
     opt4: "",
     addNewOption: "",
+    message: "",
   },
   getters: {
     options: (state) => state.options,
@@ -53,8 +55,15 @@ export default new Vuex.Store({
     updatePolls(state, val) {
       state.polls.push(val);
     },
+    pollToView(state, val) {
+      state.polls = val;
+    },
     updateAddNewOption(state, val) {
       state.addNewOption = val;
+    },
+    popUp(state, msg) {
+      state.message = msg;
+      Toast.open(state.message);
     },
   },
   actions: {
@@ -113,18 +122,18 @@ export default new Vuex.Store({
         commit("login_fail", err);
       }
     },
-    async listUsers() {
+    async listUsers({ commit }) {
       try {
         await axios.get("https://secure-refuge-14993.herokuapp.com/list_users");
       } catch (err) {
-        alert("Error");
+        commit("popUp", "Error");
       }
     },
-    async listPolls() {
+    async listPolls({ commit }) {
       try {
         await axios.get("https://secure-refuge-14993.herokuapp.com/list_polls");
       } catch (err) {
-        alert("Error");
+        commit("popUp", "Error");
       }
     },
     async createPoll({ commit }, payload) {
@@ -141,14 +150,14 @@ export default new Vuex.Store({
         commit("updateOpt3", "");
         commit("updateOpt4", "");
         commit("login_progress", false);
-        alert("Poll has been created");
+        commit("popUp", "Poll has been created");
       } catch (err) {
         commit("login_progress", false);
         commit("login_fail", err);
       }
     },
     async vote({ commit }, payload) {
-      commit("clearPolls", []);
+      // commit("clearPolls", []);
       try {
         let headers = {
           access_token: `${localStorage.getItem("userToken")}`,
@@ -161,6 +170,7 @@ export default new Vuex.Store({
         await commit("voted", {
           userToken: headers.access_token,
           pollId: payload.id,
+          option: payload.text,
         });
         commit("login_progress", false);
       } catch (err) {

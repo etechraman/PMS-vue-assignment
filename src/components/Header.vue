@@ -1,38 +1,53 @@
 <template>
-  <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <div class="navbar-item">
-        <router-link to="/" v-if="!isLoggedIn">VUE</router-link>
-        <b-navbar-item v-if="isLoggedIn" @click="home">
-          Home
+  <b-navbar
+    class="navbar is-warning"
+    role="navigation"
+    aria-label="main navigation"
+  >
+    <template slot="brand">
+      <b-navbar-item tag="router-link" :to="{ path: '/' }" v-if="!isLoggedIn"
+        >VUE</b-navbar-item
+      >
+      <b-navbar-item v-if="isLoggedIn" @click="home">
+        Home
+      </b-navbar-item>
+    </template>
+    <template slot="start">
+      <b-navbar-item v-if="isGuest" @click="listPolls">
+        Polls
+      </b-navbar-item>
+      <b-navbar-item v-if="!isLoggedIn" @click="signup">
+        Register
+      </b-navbar-item>
+      <b-navbar-dropdown hoverable collapsible v-if="isAdmin" label="Actions">
+        <b-navbar-item @click="createPoll">
+          Create a new Poll
         </b-navbar-item>
-        <b-navbar-item v-if="isGuest" @click="listPolls">
-          Polls
+        <b-navbar-item @click="managePolls">
+          Manage Polls
         </b-navbar-item>
-        <b-navbar-item v-if="!isLoggedIn" @click="signup">
-          Register
-        </b-navbar-item>
-        <b-navbar-dropdown v-if="isAdmin" label="Actions">
-          <b-navbar-item @click="createPoll">
-            Create a new Poll
-          </b-navbar-item>
-          <b-navbar-item @click="managePolls">
-            Manage Polls
-          </b-navbar-item>
-        </b-navbar-dropdown>
-      </div>
-    </div>
-    <div class="navbar-menu">
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <a v-if="!isLoggedIn" @click="login" class="button is-white">Login</a>
-          <a v-if="isLoggedIn" @click="logout" class="button is-white"
+      </b-navbar-dropdown>
+    </template>
+    <template slot="end">
+      <b-navbar-item>
+        <div class="is-flex is-flex-direction-row-reverse ">
+          <a v-if="!isLoggedIn" @click="login" class="button is-light right"
+            >Login</a
+          >
+          <a v-if="isLoggedIn" @click="logout" class="button is-light right"
             >Logout</a
           >
         </div>
+      </b-navbar-item>
+    </template>
+    <div class="navbar-brand">
+      <div class="navbar-item"></div>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
       </div>
     </div>
-  </nav>
+  </b-navbar>
 </template>
 
 <script>

@@ -16,32 +16,10 @@
           :key="index"
           class="card  mb-6 mt-5"
         >
-          <b-field
-            v-if="title === item.title"
-            label="Title: "
-            class="mt-5 ml-5"
-          >
-            <b-input
-              class="mr-6"
-              required
-              maxlength="60"
-              v-model="updatePollTitle"
-            ></b-input>
-            <button
-              :class="{
-                button: true,
-                'is-full': true,
-                'is-loading': login_progress,
-              }"
-              @click="updateTitle(item.id)"
-            >
-              Add
-            </button>
-          </b-field>
           <div class="card-header ml-5">
             {{ index + 1 }}. &nbsp; {{ item.title }}
 
-            <button @click="handleUpdateTitle(item)">
+            <button @click="promptTitle(item)">
               <b-icon class="ml-5 level-right" icon="pencil"></b-icon>
             </button>
           </div>
@@ -50,49 +28,34 @@
             v-for="(option, i) in item.options"
             :key="i"
           >
-            <input
-              disabled
-              class="mr-6"
-              name="radio"
-              type="radio"
-              v-model="selected"
-              :value="`${option.option}`"
-            />{{ option.option }}
-            <a
-              class="delete ml-5 level-right"
-              @click="deleteOption(item, option)"
-            ></a>
-            <div class="ml-5" position="is-right">
-              <br/> Votes:{{ option.vote }}
+            <div class="media">
+              <input
+                disabled
+                class="mr-6"
+                name="radio"
+                type="radio"
+                v-model="selected"
+                :value="`${option.option}`"
+              />{{ option.option }}
+              <a
+                class="delete ml-5 level-right"
+                @click="confirmDeleteOption(item, option)"
+              ></a>
+              <div class="ml-5" position="is-right">
+                <br />
+                Votes:{{ option.vote }}
+              </div>
             </div>
           </div>
-          <b-field v-if="id === item.id" label="Option: " class="mt-5 ml-5">
-            <b-input
-              class="mr-6"
-              required
-              maxlength="30"
-              v-model="addNewOption"
-            ></b-input>
-            <button
-              :class="{
-                button: true,
-                'is-full': true,
-                'is-loading': login_progress,
-              }"
-              @click="addPollOption(item.id)"
-            >
-              Add
-            </button>
-          </b-field>
           <div class="card-footer level">
             <a
               class="button is-black is-small level-left"
-              @click="addOption(item)"
+              @click="promptOption(item)"
               >Add New Option</a
             >
             <a
-              class="button is-black is-small level-right"
-              @click="deletePoll(item.id)"
+              class="button is-black is-small level-left"
+              @click="confirmDeletePoll(item.id)"
               >Delete Poll</a
             >
           </div>
@@ -104,7 +67,7 @@
 
 <script>
 import axios from "axios";
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   name: "Polls",
   data() {
@@ -113,9 +76,11 @@ export default {
       id: "",
       title: "",
       updatePollTitle: "",
+      option: "",
     };
   },
   async mounted() {
+    this.reset();
     this.$store.commit("clearPolls", []);
     try {
       const response = await axios.get(
@@ -130,7 +95,7 @@ export default {
       }
     } catch (err) {
       this.$store.commit("clearPolls", []);
-      alert("Error");
+      this.$store.commit("popUp", "Error");
     }
   },
   computed: {
@@ -151,52 +116,149 @@ export default {
     },
   },
   methods: {
-    handleUpdateTitle(item) {
-      if (this.title === "") {
-        this.title = item.title;
-        this.updatePollTitle = item.title;
-      } else this.title = "";
+    ...mapMutations(["popUp"]),
+    reset() {
+      this.id = "";
+      this.title = "";
     },
-    async updateTitle(id) {
-      const resp = await this.$store.dispatch("updateTitle", {
-        id: id,
-        title: this.updatePollTitle,
+    promptTitle(item) {
+      this.id = item.id;
+      this.$buefy.dialog.prompt({
+        message: `Update Title`,
+        confirmText: "Update Title",
+        inputAttrs: {
+          placeholder: item.title,
+          value: item.title,
+
+          maxlength: 80,
+        },
+        trapFocus: true,
+        onConfirm: (value) => this.updateTitleClick(value),
+        // onConfirm: (value) => this.$buefy.toast.open(`Your name is: ${value}`),
       });
-      if (resp) {
-        this.id = "";
-        this.title = "";
-        this.updatePollTitle = "";
-        this.viewPolls();
+    },
+    async updateTitleClick(value) {
+      if (value !== "") {
+        const resp = await this.$store.dispatch("updateTitle", {
+          id: this.id,
+          title: value,
+        });
+        if (resp) {
+          this.polls.forEach((item) => {
+            if (item.id === this.id) {
+              item.title = value;
+            }
+          });
+          this.id = "";
+          this.title = "";
+          this.updatePollTitle = "";
+        }
+      } else {
+        this.popUp("Title CanNot be empty");
       }
+    },
+    promptOption(item) {
+      this.id = item.id;
+      this.$buefy.dialog.prompt({
+        message: `Add Option`,
+        confirmText: "Add Option",
+        inputAttrs: {
+          placeholder: "Enter Option here",
+          maxlength: 30,
+        },
+        trapFocus: true,
+
+        onConfirm: (value) => {
+          let bool = Boolean;
+          item.options.forEach((option) => {
+            if (value !== option.option) bool = true;
+            else {
+              bool = false;
+            }
+          });
+          if (bool) this.addPollOption(value);
+          else {
+            this.popUp("New Option should never match old ones");
+          }
+        },
+      });
+    },
+    async addPollOption(value) {
+      if (value !== "") {
+        const resp = await this.$store.dispatch("addNewOption", {
+          id: this.id,
+          text: value,
+        });
+        if (resp) {
+          this.polls.forEach((item) => {
+            if (item.id === this.id) {
+              item.options.push({
+                option: value,
+                vote: 0,
+              });
+            }
+          });
+          this.id = "";
+        }
+      } else this.popUp("Option Cannot be blank");
     },
 
-    addOption(item) {
-      if (this.id === "") this.id = item.id;
-      else this.id = "";
+    confirmDeletePoll(id) {
+      this.id = id;
+      this.$buefy.dialog.confirm({
+        title: "Deleting Poll",
+        message:
+          "Are you sure you want to <b>delete</b> this poll? This action cannot be undone.",
+        confirmText: "Delete Poll",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => this.deletePoll(),
+      });
     },
-    async addPollOption(id) {
-      const resp = await this.$store.dispatch("addNewOption", {
-        id: id,
-        text: this.addNewOption,
+
+    async deletePoll() {
+      const resp = await this.$store.dispatch("deletePoll", this.id);
+      if (resp) {
+        this.popUp("Poll deleted!");
+        let itemToBeDeleted = "";
+        this.polls.forEach((item, index) => {
+          if (item.id === this.id) itemToBeDeleted = index;
+        });
+        this.polls.splice(itemToBeDeleted, 1);
+        this.id = "";
+      }
+    },
+    confirmDeleteOption(item, option) {
+      this.id = item.id;
+      this.option = option.option;
+      this.$buefy.dialog.confirm({
+        title: "Deleting Option",
+        message:
+          "Are you sure you want to <b>delete</b> this option? This action cannot be undone.",
+        confirmText: "Delete Option",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => this.deleteOption(),
+      });
+    },
+    async deleteOption() {
+      const resp = await this.$store.dispatch("deleteOption", {
+        id: this.id,
+        text: this.option,
       });
       if (resp) {
-        this.id = "";
-        this.viewPolls();
-      }
-    },
-    async deletePoll(id) {
-      if (confirm("CAUTION!! Are you sure you want to delete the poll")) {
-        const resp = await this.$store.dispatch("deletePoll", id);
-        if (resp) this.viewPolls();
-      }
-    },
-    async deleteOption(item, option) {
-      if (confirm("Caution!! Are you sure you want to delete this option?")) {
-        const resp = await this.$store.dispatch("deleteOption", {
-          id: item.id,
-          text: option.option,
+        this.popUp("Option has been deleted");
+        this.polls.forEach((item) => {
+          let optionToBeDeleted = "";
+          if (item.id === this.id) {
+            item.options.forEach((item, index) => {
+              if (item.option === this.option) optionToBeDeleted = index;
+            });
+            item.options.splice(optionToBeDeleted, 1);
+          }
         });
-        if (resp) this.viewPolls();
+        this.id = "";
+        this.option = "";
       }
     },
     async viewPolls() {
@@ -215,7 +277,7 @@ export default {
       } catch (err) {
         // console.log(err);
         this.$store.commit("clearPolls", []);
-        alert("Error");
+        this.popUp("Error");
       }
     },
   },

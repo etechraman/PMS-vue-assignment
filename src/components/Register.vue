@@ -10,7 +10,7 @@
       </div>
     </section>
     <section>
-      <div class="columns">
+      <div class="columns p-5">
         <div class="column"></div>
         <div class="column">
           <RegisterForm />
@@ -26,8 +26,8 @@ import RegisterForm from "./../components/RegisterForm";
 export default {
   name: "Register",
   components: {
-    RegisterForm
-  }
+    RegisterForm,
+  },
 };
 </script>
 
