@@ -27,7 +27,10 @@ export default {
         commit("updateId", "");
         commit("updateRole", "");
         commit("updatePassword", "");
+        commit("updateConfirmPassword", "");
         commit("login_progress", false);
+        if (response.data.error === 1) alert(response.data.message);
+        else alert("Congratulations!! User Registered");
       } catch (err) {
         // console.log(err);
         commit("login_progress", false);

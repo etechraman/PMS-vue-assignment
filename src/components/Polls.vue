@@ -113,7 +113,7 @@ export default {
           ) {
             pollID = item.pollId;
             return false;
-          } else pollID = "";
+          }
         });
       }
 
@@ -121,7 +121,8 @@ export default {
         const response = await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_polls"
         );
-        for (let i = 0; i < response.data.data.length; i++) {
+
+        for (let i = response.data.data.length - 1; i >= 0; i--) {
           if (pollID === "") {
             this.$store.commit("updatePolls", {
               id: response.data.data[i]._id,

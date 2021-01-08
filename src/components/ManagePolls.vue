@@ -16,8 +16,34 @@
           :key="index"
           class="card  mb-6 mt-5"
         >
+          <b-field
+            v-if="title === item.title"
+            label="Title: "
+            class="mt-5 ml-5"
+          >
+            <b-input
+              class="mr-6"
+              required
+              maxlength="60"
+              v-model="updatePollTitle"
+            ></b-input>
+            <button
+              :class="{
+                button: true,
+                'is-full': true,
+                'is-loading': login_progress,
+              }"
+              @click="updateTitle(item.id)"
+            >
+              Add
+            </button>
+          </b-field>
           <div class="card-header ml-5">
             {{ index + 1 }}. &nbsp; {{ item.title }}
+
+            <button @click="handleUpdateTitle(item)">
+              <b-icon class="ml-5 level-right" icon="pencil"></b-icon>
+            </button>
           </div>
           <div
             class="card-content ml-5 level-left"
@@ -36,6 +62,9 @@
               class="delete ml-5 level-right"
               @click="deleteOption(item, option)"
             ></a>
+            <div class="ml-5" position="is-right">
+              <br/> Votes:{{ option.vote }}
+            </div>
           </div>
           <b-field v-if="id === item.id" label="Option: " class="mt-5 ml-5">
             <b-input
@@ -82,6 +111,8 @@ export default {
     return {
       selected: "",
       id: "",
+      title: "",
+      updatePollTitle: "",
     };
   },
   async mounted() {
@@ -120,6 +151,25 @@ export default {
     },
   },
   methods: {
+    handleUpdateTitle(item) {
+      if (this.title === "") {
+        this.title = item.title;
+        this.updatePollTitle = item.title;
+      } else this.title = "";
+    },
+    async updateTitle(id) {
+      const resp = await this.$store.dispatch("updateTitle", {
+        id: id,
+        title: this.updatePollTitle,
+      });
+      if (resp) {
+        this.id = "";
+        this.title = "";
+        this.updatePollTitle = "";
+        this.viewPolls();
+      }
+    },
+
     addOption(item) {
       if (this.id === "") this.id = item.id;
       else this.id = "";
@@ -152,7 +202,6 @@ export default {
     async viewPolls() {
       this.$store.commit("clearPolls", []);
       try {
-        //   commit("login_progress", true);
         const response = await axios.get(
           "https://secure-refuge-14993.herokuapp.com/list_polls"
         );

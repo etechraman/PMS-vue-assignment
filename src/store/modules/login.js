@@ -5,6 +5,7 @@ export default {
   state: {
     username: "",
     password: "",
+    confirmPassword: "",
     user: {},
     isLoggedIn: false,
     error: false,
@@ -40,8 +41,8 @@ export default {
       } catch (err) {
         console.log(err);
         commit("login_progress", false);
-        alert("Login Failed");
-        commit("login_fail", err);
+        alert("Login Failed! Check username and password");
+        // commit("login_fail", err);
       }
     },
     logout({ commit }) {
@@ -89,6 +90,9 @@ export default {
     },
     updatePassword(state, val) {
       state.password = val;
+    },
+    updateConfirmPassword(state, val) {
+      state.confirmPassword = val;
     },
     updateIsLoggedIn(state, val) {
       state.isLoggedIn = val;

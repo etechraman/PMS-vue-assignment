@@ -58,6 +58,21 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    async updateTitle({ commit }, payload) {
+      try {
+        commit("login_progress", true);
+        await axios.post(
+          `https://secure-refuge-14993.herokuapp.com/update_poll_title?id=${payload.id}&title=${payload.title}`
+        );
+        commit("login_progress", false);
+
+        return true;
+      } catch (err) {
+        commit("login_progress", false);
+        commit("login_fail", err);
+      }
+    },
+
     async addNewOption({ commit }, payload) {
       try {
         commit("login_progress", true);
@@ -99,17 +114,15 @@ export default new Vuex.Store({
       }
     },
     async listUsers() {
-      try {await axios.get(
-          "https://secure-refuge-14993.herokuapp.com/list_users"
-        );
+      try {
+        await axios.get("https://secure-refuge-14993.herokuapp.com/list_users");
       } catch (err) {
         alert("Error");
       }
     },
     async listPolls() {
-      try {await axios.get(
-          "https://secure-refuge-14993.herokuapp.com/list_polls"
-        );
+      try {
+        await axios.get("https://secure-refuge-14993.herokuapp.com/list_polls");
       } catch (err) {
         alert("Error");
       }
@@ -128,6 +141,7 @@ export default new Vuex.Store({
         commit("updateOpt3", "");
         commit("updateOpt4", "");
         commit("login_progress", false);
+        alert("Poll has been created");
       } catch (err) {
         commit("login_progress", false);
         commit("login_fail", err);

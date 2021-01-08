@@ -58,9 +58,9 @@ router.beforeEach((to, from, next) => {
         to.path == "/" ||
         to.path == "/#" ||
         to.path == "/login" ||
-        to.path == "/register" ||
-        to.path == "createPoll" ||
-        to.path == "managePolls"
+        to.path == "/createpoll" ||
+        to.path == "/managepolls" ||
+        to.path == "/register"
       ) {
         next("/profile");
       } else {
@@ -69,16 +69,16 @@ router.beforeEach((to, from, next) => {
     } else if (localStorage.getItem("isAdmin") !== null) {
       if (
         to.path == "/profile" ||
-        to.path == "/register" ||
-        to.path == "createPoll" ||
-        to.path == "managePolls"
+        to.path == "/createpoll" ||
+        to.path == "/managepolls"
       ) {
         next();
       } else if (
         to.path == "/" ||
         to.path == "/#" ||
         to.path == "/login" ||
-        to.path == "/polls"
+        to.path == "/polls" ||
+        to.path == "/register"
       ) {
         next("/profile");
       } else {
@@ -86,7 +86,12 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    if (to.path == "/" || to.path == "/login" || to.path == "/#") {
+    if (
+      to.path == "/" ||
+      to.path == "/login" ||
+      to.path == "/#" ||
+      to.path == "/register"
+    ) {
       next();
     } else {
       next(false);

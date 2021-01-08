@@ -111,7 +111,9 @@ export default {
   methods: {
     ...mapActions(["createPoll"]),
     registerClick() {
-      if (
+      if (this.title === "") alert("Enter Title first");
+      else if (
+        this.title !== "" &&
         this.opt1 !== "" &&
         this.opt2 !== "" &&
         this.opt3 !== "" &&
